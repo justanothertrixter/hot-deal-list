@@ -772,12 +772,12 @@ def _collect_impl(deep=False):
             apply_qualification(dtf, dtp)
             set_meta("qualified_count", count_qualified(dtf, dtp))
 
-        # Ранний выход: порог найден, как только набрано достаточно объявлений.
+        # Максимизируем каталог: используем самый мягкий порог (5%/10%), как только
+        # он даёт >= TARGET. Точную «скидку» пользователь сузит фильтром min_drop.
         if not deep and count_collected() >= MIN_LISTINGS:
-            for tf, tp in THRESHOLD_STEPS:
-                if count_qualified(tf, tp) >= TARGET:
-                    final = (tf, tp)
-                    break
+            dtf, dtp = THRESHOLD_STEPS[-1]
+            if count_qualified(dtf, dtp) >= TARGET:
+                final = (dtf, dtp)
         if final:
             break
 
