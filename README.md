@@ -103,3 +103,26 @@ requirements.txt
   значению в валюте объявления (используйте фильтр валюты для корректного сравнения).
 - Если после 50 распарсенных объявлений ни у одного нет истории цен, сбор
   останавливается с ошибкой (фрагмент HTML — в `structure_error.html`).
+
+## Деплой на Render
+
+Схема: **Render — витрина** (отдаёт сайт и API), **Mac — скрапер** (резидентный IP).
+
+> list.am блокирует IP дата-центров, поэтому скрапер на Render не работает
+> (`render.yaml` выставляет `HOTDEAL_DISABLE_SCHEDULER=1`). Каталог обновляется
+> с вашего Mac, а Render передеплоивается при пуше.
+
+1. **One-click деплой:** https://render.com/deploy?repo=https://github.com/justanothertrixter/hot-deal-list
+   (Render читает `render.yaml`, free-план, `https://hot-deal-list.onrender.com`).
+2. **Обновление каталога** — запускать на Mac:
+   ```bash
+   ./sync_render.sh
+   ```
+   Скрипт делает глубокий сбор, коммитит `hot_deals.db` и пушит в GitHub.
+   Render (autoDeploy) передеплоивается с новыми данными.
+3. По расписанию (cron, каждые 6 часов):
+   ```
+   0 */6 * * * cd /Users/hayk/Documents/deepseek-harness/default-workspace && ./sync_render.sh >> sync.log 2>&1
+   ```
+
+Для пуша без пароля настройте SSH-ключ GitHub или `git credential-osxkeychain`.
