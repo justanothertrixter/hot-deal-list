@@ -1044,6 +1044,7 @@ def index():
         subscription=sub,
         qualified_count=int(meta.get("qualified_count", 0) or 0),
         collected_count=int(meta.get("collected_count", 0) or 0),
+        build_id=(os.environ.get("RENDER_GIT_COMMIT", "local") or "local")[:7],
     )
 
 

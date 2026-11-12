@@ -3,6 +3,7 @@ services:
     name: hot-deal-list
     env: python
     plan: free
+    autoDeploy: true
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn -c gunicorn.conf.py app:app
     envVars:
