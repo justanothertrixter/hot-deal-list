@@ -130,3 +130,18 @@ requirements.txt
 <!-- deploy verified 2026-11-12T16:36:42Z -->
 
 <!-- auto-deploy test 2026-11-12T20:02:17Z -->
+
+### Deploy Hook (гарантированный деплой)
+
+Автодеплой по пушу в Render может не срабатывать (GitHub-вебхук). Надёжнее — Deploy Hook:
+
+1. Render → сервис `hot-deal-list` → **Settings → Deploy** → покажите (иконка глаза)
+   и скопируйте **Deploy Hook** URL.
+2. Сохраните локально (не в репозиторий):
+   ```bash
+   mkdir -p ~/.config/hotdeal
+   echo "URL_ХУКА" > ~/.config/hotdeal/deploy_hook
+   ```
+3. `./sync_render.sh` после пуша дёрнет хук — деплой запустится гарантированно.
+
+Хук — секрет: не коммитьте его, при утечке нажмите «Regenerate hook».
