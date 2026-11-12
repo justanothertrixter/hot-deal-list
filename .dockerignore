@@ -1,0 +1,15 @@
+.venv
+.git
+__pycache__
+*.pyc
+*.db
+*.db-wal
+*.db-shm
+.tmp
+.uv-cache
+.uv-python
+.pip-cache
+cloudflared
+cloudflared.tgz
+collector.log
+structure_error.html

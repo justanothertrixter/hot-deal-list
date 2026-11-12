@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HOT DEAL LIST — горячие предложения недвижимости Армении</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="/">🔥 <span>HOT&nbsp;DEAL&nbsp;LIST</span></a>
+      <div class="nav-actions">
+        <a href="#pricing" class="nav-link">Тарифы</a>
+        <a href="#deals" class="nav-link">Предложения</a>
+        {% if is_subscribed %}
+          <span class="sub-badge">✓ Подписка активна</span>
+          <button id="cancel-btn" class="btn ghost sm" type="button">Отменить</button>
+        {% else %}
+          <button id="subscribe-btn" class="btn primary" type="button">Подписаться</button>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-glow"></div>
+    <div class="wrap">
+      <div class="hero-badge">🔥 Ереван · вся Армения · данные list.am</div>
+      <h1 class="hero-title">Горячие предложения<br><span class="grad">недвижимости Армении</span></h1>
+      <p class="hero-sub">
+        Каждый день находим объявления, цена которых упала на <b>5% и более</b> —
+        до того, как их купят другие.
+      </p>
+
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-num" id="stat-deals">{{ qualified_count }}</div>
+          <div class="stat-label">горячих предложений</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">5–50%</div>
+          <div class="stat-label">падение цены</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">6ч</div>
+          <div class="stat-label">цикл обновления</div>
+        </div>
+      </div>
+
+      <div class="hero-cta">
+        <a href="#deals" class="btn primary lg">Смотреть предложения</a>
+        {% if not is_subscribed %}<a href="#pricing" class="btn ghost lg">Тарифы</a>{% endif %}
+      </div>
+    </div>
+  </header>
+
+  <section id="pricing" class="pricing">
+    <div class="wrap">
+      <h2 class="section-title">Подписка</h2>
+      <p class="section-sub">Один тариф — полный доступ ко всем горячим предложениям.</p>
+
+      <div class="plans">
+        {% for key, p in plans.items() %}
+        <div class="plan {% if key == '6m' %}featured{% endif %}">
+          {% if key == '3m' %}<span class="plan-flag">Минимум</span>{% endif %}
+          <div class="plan-name">{{ p.label }}</div>
+          <div class="plan-price">${{ p.price }}<span class="plan-period">/{{ p.period }}</span></div>
+          <div class="plan-save muted">≈ ${{ (p.price / p.months) | round(0) | int }} /мес</div>
+          <ul class="plan-features">
+            <li>Все горячие предложения</li>
+            <li>Фильтры: цена · регион · тип</li>
+            <li>Графики изменения цены</li>
+            <li>Цена за м² и её падение</li>
+            <li>Обновление каждые 6 часов</li>
+          </ul>
+          <button class="btn primary plan-btn {% if key == '6m' %}accent{% endif %}"
+                  data-plan="{{ key }}" type="button">Подписаться за ${{ p.price }}</button>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section id="deals" class="deals">
+    <div class="wrap">
+      <div class="deals-head">
+        <div>
+          <h2 class="section-title">Горячие предложения <span id="deals-count" class="count-pill"></span></h2>
+          <div class="updated-label">Обновлено: <b>{{ last_updated_display }}</b>
+            {% if relaxed %}<span class="relaxed-badge" title="Строгий порог (15%/10%) дал меньше {{ target }} объявлений — порог снижен.">порог снижен</span>{% endif %}
+          </div>
+        </div>
+        <div class="deals-head-right">
+          <button id="refresh-btn" class="btn ghost sm" type="button">⟳ Обновить данные</button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <input id="f-q" class="input search" type="search" placeholder="Поиск: район, улица…">
+        <select id="f-category" class="input"><option value="">Тип: все</option></select>
+        <select id="f-region" class="input"><option value="">Регион: все</option></select>
+        <select id="f-currency" class="input"><option value="">Валюта: все</option></select>
+        <input id="f-min-price" class="input" type="number" min="0" placeholder="Цена от">
+        <input id="f-max-price" class="input" type="number" min="0" placeholder="до">
+        <input id="f-min-drop" class="input" type="number" min="0" max="100" placeholder="Скидка ≥ %">
+        <button id="f-reset" class="btn ghost sm" type="button">Сбросить</button>
+      </div>
+
+      <div id="deals-status" class="deals-status"></div>
+      <div id="deals-grid" class="grid"></div>
+      <div id="locked" class="locked hidden"></div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div class="footer-brand">🔥 HOT DEAL LIST</div>
+      <div class="footer-note">Горячие предложения недвижимости Армении · источник: list.am · демо-режим оплаты</div>
+    </div>
+  </footer>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <button id="modal-close" class="modal-close" type="button">✕</button>
+      <h3 class="modal-title">Оформить подписку</h3>
+      <div class="modal-plans">
+        <label class="radio-plan">
+          <input type="radio" name="plan" value="3m" checked>
+          <span><b>$201</b> / 3 месяца</span>
+        </label>
+        <label class="radio-plan">
+          <input type="radio" name="plan" value="6m">
+          <span><b>$473</b> / 6 месяцев</span>
+        </label>
+      </div>
+      <input id="modal-email" class="input" type="email" placeholder="Email (необязательно)">
+      <button id="modal-submit" class="btn primary lg full" type="button">Оплатить и открыть доступ</button>
+      <div class="modal-note">Демо-режим: платёж не спишется. На проде подключается Stripe.</div>
+    </div>
+  </div>
+
+  <script>window.__INIT__ = {{ {"subscribed": is_subscribed, "error": error} | tojson }};</script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
