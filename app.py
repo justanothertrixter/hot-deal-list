@@ -220,6 +220,21 @@ def init_db():
             conn.execute(ddl)
             log.info("Миграция БД: добавлена колонка listings.%s", col)
 
+    # Лечим «зависший» статус сбора: если collecting висит > 90 минут,
+    # это остаток упавшего/прерванного процесса — помечаем как done.
+    status_row = conn.execute("SELECT value FROM meta WHERE key='status'").fetchone()
+    started_row = conn.execute("SELECT value FROM meta WHERE key='started_at'").fetchone()
+    if status_row and status_row["value"] == "collecting" and started_row and started_row["value"]:
+        try:
+            started = datetime.fromisoformat(started_row["value"])
+            if (datetime.now() - started).total_seconds() > 90 * 60:
+                conn.execute("UPDATE meta SET value='done' WHERE key='status'")
+                conn.execute("UPDATE meta SET value=? WHERE key='last_updated'",
+                             (datetime.now().isoformat(timespec="seconds"),))
+                log.info("Вылечен зависший статус сбора (collecting -> done)")
+        except ValueError:
+            pass
+
     conn.commit()
     conn.close()
 
