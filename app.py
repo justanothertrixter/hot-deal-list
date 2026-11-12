@@ -142,6 +142,13 @@ logging.basicConfig(
 )
 log = logging.getLogger("hotdeals")
 
+# Единый часовой пояс (иначе Render работает в UTC и время/инкрементальность плывут).
+os.environ.setdefault("TZ", "Asia/Yerevan")
+try:
+    time.tzset()
+except AttributeError:  # Windows
+    pass
+
 # ----------------------------------------------------------------------------
 # База данных
 # ----------------------------------------------------------------------------
