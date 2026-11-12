@@ -1000,6 +1000,9 @@ app = Flask(__name__)
 app.secret_key = SECRET_KEY
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=400)
 
+# Под gunicorn main() не вызывается — схему БД гарантируем при импорте.
+init_db()
+
 
 @app.route("/")
 def index():
