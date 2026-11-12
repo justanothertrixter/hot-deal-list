@@ -128,3 +128,5 @@ requirements.txt
 Для пуша без пароля настройте SSH-ключ GitHub или `git credential-osxkeychain`.
 
 <!-- deploy verified 2026-11-12T16:36:42Z -->
+
+<!-- auto-deploy test 2026-11-12T20:02:17Z -->
